@@ -1,8 +1,11 @@
-/*
+﻿/*
  * =========================================================================================
  * DIARIO DI BORDO & PROMPT PER IL TE STESSO DI DOMANI
  * =========================================================================================
  *
+ * [DA FARE]
+ * Commentare bene tutto
+ * 
  * [COSA ABBIAMO FATTO IN QUESTA SESSIONE]
  * 1. Iniziato il porting del plugin da Bungee a Velocity, partendo da UltimateFriends.java. Abbiamo adattato l'entry point del plugin, gestito l'inizializzazione e la chiusura del proxy, e preparato il terreno
  * 2. SocialSpy.java: Convertito da Bungee a Velocity. Gestiti correttamente gli 'Optional' per ritrovare i Player a runtime.
@@ -20,7 +23,7 @@
  * 
  * -> LE REGOLE D'ORO DA RISPETTARE <-
  * 1. K.I.S.S. (Keep It Simple, Stupid)! Codice chiaro, diretto, basico, pulito.
- * 2. PROCEDI LENTAMENTE (FILE BY FILE). Questa é una regola ferrea dettata dall'utente: l'Ai é veloce, l'umano é comprensibilmente 
+ * 2. PROCEDI LENTAMENTE (FILE BY FILE). Questa è una regola ferrea dettata dall'utente: l'Ai è veloce, l'umano è comprensibilmente 
  *    più lento. Metti le mani su MASSIMO UN FILE per volta e spiegagli i passaggi in maniere umane e dirette! Niente passaggi in blocchi giganti.
  * 3. NON INVENTARE CODICE. Controlla SEMPRE l'esistenza delle feature/metodi nel codice originario di base (es. come successo con "removeFriendFromCache") prima di aggiungerne versioni Velocity.
  * 4. FERMATI e chiedi all'utente prima di migrare nuove features importanti. Chiedigli conferma, sempre.
@@ -52,8 +55,6 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 
-import com.velocityPort.commands.MsgCmd;
-import com.velocityPort.commands.ReplyCmd;
 import com.velocityPort.communication.CommunicationModule;
 import com.velocityPort.hook.Hook;
 import com.velocityPort.hook.HookManager;
@@ -76,10 +77,24 @@ public class UltimateFriends {
    
    private final Path dataDirectory;
 
+/**
+    * getDataDirectory
+    * Recupera il percorso della directory dei dati assegnata dal proxy.
+    * 
+    * @return Il Path della cartella dei dati del plugin
+    */
    public Path getDataDirectory() {
       return this.dataDirectory;
    }
 
+/**
+    * UltimateFriends
+    * Costruttore principale per l'iniezione delle dipendenze di Velocity.
+    * 
+    * @param server Il server proxy Velocity
+    * @param logger Il logger SLF4J
+    * @param dataDirectory Il percorso alla directory dei dati
+    */
    @Inject
    public UltimateFriends(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
       UltimateFriends.server = server;
@@ -88,6 +103,13 @@ public class UltimateFriends {
       plugin = this;
    }
 
+   /**
+    * getPlayerProfile
+    * Recupera il profilo di un giocatore dalla memoria cache.
+    * 
+    * @param var0 Il nome del giocatore (solitamente minuscolo/case-insensitive)
+    * @return L'oggetto PlayerProfile associato, o null se non è online o non è trovato
+    */
    public static PlayerProfile getPlayerProfile(String var0) {
       if (var0 == null) {
          $$$reportNull$$$0(0);
@@ -105,6 +127,13 @@ public class UltimateFriends {
       return var1;
    }
 
+/**
+    * addPlayerProfile
+    * Aggiunge e associa un profilo giocatore alla memoria cache in runtime.
+    * 
+    * @param var0 Il nome del giocatore a cui associare il record
+    * @param var1 L'oggetto PlayerProfile da inserire in memoria
+    */
    public static void addPlayerProfile(String var0, PlayerProfile var1) {
       if (var0 == null) {
          $$$reportNull$$$0(1);
@@ -124,6 +153,12 @@ public class UltimateFriends {
 
    }
 
+/**
+    * getPlayerProfiles
+    * Restituisce una copia di tutti i profili giocatore correntemente caricati in memoria.
+    * 
+    * @return Una lista di PlayerProfile attivi
+    */
    public static List<PlayerProfile> getPlayerProfiles() {
       rwLock.readLock().lock();
 
@@ -138,6 +173,13 @@ public class UltimateFriends {
    }
 
    @Nullable
+   /**
+    * removePlayerProfile
+    * Rimuove il profilo di un giocatore temporaneo dalla memoria cache, usato alla disconnessione.
+    * 
+    * @param var0 Il nome del giocatore
+    * @return L'oggetto PlayerProfile rimosso con successo, oppure null se non esisteva
+    */
    public static PlayerProfile removePlayerProfile(String var0) {
       if (var0 == null) {
          $$$reportNull$$$0(3);
@@ -155,26 +197,62 @@ public class UltimateFriends {
       return var1;
    }
 
+   /**
+    * getStorage
+    * Recupera il sistema di archiviazione dati attivo.
+    * 
+    * @return L'oggetto Storage
+    */
    public static Storage getStorage() {
       return storage;
    }
 
+   /**
+    * getCommunicationModule
+    * Recupera il modulo di comunicazione network fra proxy (es. Bungee, Velocity).
+    * 
+    * @return L'oggetto CommunicationModule in uso per gestire messaggi cross-server
+    */
    public static CommunicationModule getCommunicationModule() {
       return communicationModule;
    }
 
+   /**
+    * getConfig
+    * Recupera la configurazione corrente del plugin.
+    * 
+    * @return L'oggetto Config attualmente in uso
+    */
    public static Config getConfig() {
       return config;
    }
 
+   /**
+    * getHookManager
+    * Recupera il gestore degli hook (iniezioni o integrazioni in plugin esterni).
+    * 
+    * @return l'HookManager installato
+    */
    public static HookManager getHookManager() {
       return hookManager;
    }
 
+/**
+    * getDataFolder
+    * Converte il Path della directory dati in un file locale standard.
+    * 
+    * @return Un oggetto File che punta alla cartella dei dati
+    */
    public File getDataFolder() {
       return dataDirectory.toFile();
    }
 
+/**
+    * onProxyInitialization
+    * Metodo di avvio eseguito durante l'inizializzazione del Proxy. Allestisce config, storage e moduli.
+    * 
+    * @param event L'evento di inizializzazione lanciato da Velocity
+    */
    @Subscribe
    public void onProxyInitialization(ProxyInitializeEvent event) {
       long var1 = System.currentTimeMillis();
@@ -232,6 +310,12 @@ public class UltimateFriends {
       }
    }
 
+/**
+    * onProxyShutdown
+    * Metodo eseguito durante lo spegnimento del server. Si occupa di salvare, disattivare listeners ed hook.
+    * 
+    * @param event L'evento di spegnimento lanciato da Velocity
+    */
    @Subscribe
    public void onProxyShutdown(ProxyShutdownEvent event) {
       shuttingDown = true;
@@ -252,6 +336,12 @@ public class UltimateFriends {
       logger.info("Disabled");
    }
 
+/**
+    * copyFiles
+    * Estrae i file di base (config.yml e migrate.yml) dalle risorse del jar all'interno della cartella dei dati se non esistono.
+    * 
+    * @return true se tutti i file sono stati copiati (o esistono) con successo, false in caso di errori
+    */
    private boolean copyFiles() {
       String[] var1 = new String[]{"config.yml", "migrate.yml"};
       String[] var2 = var1;
@@ -275,6 +365,13 @@ public class UltimateFriends {
       return true;
    }
 
+/**
+    * $$$reportNull$$$0
+    * Metodo sintetico generato dal compilatore per segnalare la mancanza di argomenti nei controlli Null.
+    * 
+    * @param var0 ID mnemonico del null-check fallito
+    * @throws IllegalArgumentException Sempre lanciata quando invocato
+    */
    // $FF: synthetic method
    private static void $$$reportNull$$$0(int var0) {
       Object[] var10001 = new Object[3];
@@ -306,3 +403,7 @@ public class UltimateFriends {
       throw new IllegalArgumentException(String.format("Argument for @NotNull parameter '%s' of %s.%s must not be null", var10001));
    }
 }
+
+
+
+

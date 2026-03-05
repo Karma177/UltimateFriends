@@ -1,7 +1,7 @@
 package com.velocityPort.migrate.v2_6;
 
-import com.gmail.holubvojtech.jsql.Database;
-import com.gmail.holubvojtech.jsql.Result;
+import com.velocityPort.jsql.Database;
+import com.velocityPort.jsql.Result;
 import com.velocityPort.Config;
 import com.velocityPort.UltimateFriends;
 import com.velocityPort.migrate.Migration;

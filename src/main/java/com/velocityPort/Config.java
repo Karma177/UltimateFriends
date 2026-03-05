@@ -1,4 +1,4 @@
-package com.velocityPort;
+﻿package com.velocityPort;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import com.gmail.holubvojtech.jsql.connectors.DatabaseConnector;
+import com.velocityPort.jsql.connectors.DatabaseConnector;
 import com.velocityPort.commands.Cmds;
 import com.velocityPort.commands.MsgCmd;
 import com.velocityPort.commands.ReplyCmd;
@@ -91,6 +91,12 @@ public class Config {
       this.loadFilterLog();
    }
 
+   /**
+    * reload
+    * Ricarica la configurazione dal file su disco e aggiorna tutte le impostazioni e moduli in memoria.
+    * 
+    * @throws IOException Se c'è un errore nella lettura del file
+    */
    public void reload() throws IOException {
       this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.configFile);
       this.loadServerAliases();
@@ -104,66 +110,163 @@ public class Config {
       this.loadFilterLog();
    }
 
+   /**
+    * getConfig
+    * Restituisce l'oggetto Configuration di Velocity (basato su YamlConfiguration) caricato in memoria.
+    * 
+    * @return La struttura dati della configurazione principale
+    */
    public Configuration getConfig() {
       return this.config;
    }
 
+   /**
+    * getStorage
+    * Restituisce il modulo Storage responsabile dell'uso del database (MySQL in questo caso).
+    * 
+    * @return L'istanza generica del database di Storage
+    */
    public Storage getStorage() {
       return this.storage;
    }
 
+   /**
+    * getCmds
+    * Restituisce l'istanza dei comandi generali.
+    * 
+    * @return Il setup Cmds legato al plugin
+    */
    public Cmds getCmds() {
       return this.cmds;
    }
 
+   /**
+    * getReplyCmd
+    * Restituisce l'istanza del comando /reply che intercetta i PM di sistema.
+    * 
+    * @return L'istanza ReplyCmd
+    */
    public ReplyCmd getReplyCmd() {
       return this.replyCmd;
    }
 
+   /**
+    * getMsgCmd
+    * Restituisce l'istanza del comando /msg.
+    * 
+    * @return L'istanza MsgCmd
+    */
    public MsgCmd getMsgCmd() {
       return this.msgCmd;
    }
 
+   /**
+    * getMsgOverride
+    * Ritorna la dicitura opzionale definita nella stringa 'msgOverride' se usata per reindirizzare la chat.
+    * 
+    * @return La stringa definita per l'override dei msg
+    */
    public String getMsgOverride() {
       return this.msgOverride;
    }
 
+   /**
+    * getLanguageLoader
+    * Restituisce il gestore dei file di linguaggio caricato dall'utente.
+    * 
+    * @return L'istanza LanguageLoader
+    */
    public LanguageLoader getLanguageLoader() {
       return this.languageLoader;
    }
 
+   /**
+    * getCore
+    * Restituisce i settaggi base (Core) della configurazione.
+    * 
+    * @return L'oggetto Config.Core contenente i valori vitali
+    */
    public Config.Core getCore() {
       return this.core;
    }
 
+   /**
+    * getCommunicationModule
+    * Restituisce il modulo di comunicazione network tra le istanze cross-server.
+    * 
+    * @return L'istanza di CommunicationModule associata a questa configurazione
+    */
    public CommunicationModule getCommunicationModule() {
       return this.communicationModule;
    }
 
+   /**
+    * getOptions
+    * Restituisce le opzioni generali del plugin configurate dall'utente.
+    * 
+    * @return L'oggetto Options
+    */
    public Config.Options getOptions() {
       return this.options;
    }
 
+   /**
+    * getDisable
+    * Restituisce le impostazioni di disattivazione relative a server, filtri, ecc.
+    * 
+    * @return L'oggetto Disable
+    */
    public Config.Disable getDisable() {
       return this.disable;
    }
 
+   /**
+    * getMaxFriends
+    * Restituisce il numero globale massimo di amici consentiti per giocatore.
+    * 
+    * @return Un intero indicante il tetto massimo degli amici
+    */
    public int getMaxFriends() {
       return this.maxFriends;
    }
 
+   /**
+    * getSort
+    * Restituisce il metodo di ordinamento della lista amici configurato (es. ALPHA, ONLINE).
+    * 
+    * @return Il tipo di ordinamento SortType
+    */
    public Config.SortType getSort() {
       return this.sort;
    }
 
+   /**
+    * getPerPage
+    * Restituisce il numero di amici da mostrare per ogni pagina della friend-list.
+    * 
+    * @return Il limite di elementi per pagina
+    */
    public int getPerPage() {
       return this.perPage;
    }
 
+   /**
+    * getDateFormat
+    * Restituisce il formattatore di date configurato (utilizzato per i last-login ecc.).
+    * 
+    * @return SimpleDateFormat inizializzato secondo la stringa della configurazione
+    */
    public SimpleDateFormat getDateFormat() {
       return this.dateFormat;
    }
 
+   /**
+    * getMaxFriends (Player)
+    * Recupera il limite di amici consentito basandosi sui permessi di un giocatore specifico.
+    * 
+    * @param var1 Il Player di cui controllare i permessi (nullable)
+    * @return L'intero che rappresenta il massimo di amici consentiti per questo utente
+    */
    public int getMaxFriends(Player var1) {
       if (var1 == null) {
          return this.getMaxFriends();
@@ -195,22 +298,52 @@ public class Config {
       }
    }
 
+/**
+    * getPlayerLookup
+    * Restituisce l'interfaccia di ricerca giocatori online e offline.
+    * 
+    * @return L'oggetto PlayerLookup corrente
+    */
    public PlayerLookup getPlayerLookup() {
       return this.playerLookup;
    }
 
+/**
+    * getDefaultSocialSpyPlayers
+    * Restituisce la lista di giocatori che hanno lo spionaggio dei messaggi privati (SocialSpy) abilitato di default.
+    * 
+    * @return Una lista di stringhe con i nomi dei giocatori
+    */
    public List<String> getDefaultSocialSpyPlayers() {
       return this.defaultSocialSpyPlayers;
    }
 
+/**
+    * getCustomButtons
+    * Restituisce la lista dei pulsanti personalizzati configurati per apparire sui messaggi (es. Accetta/Rifiuta).
+    * 
+    * @return Una lista di CustomButton
+    */
    public List<Config.CustomButton> getCustomButtons() {
       return this.customButtons;
    }
 
+/**
+    * getServerAliases
+    * Restituisce gli alias configurati per i server (es. da 'lobby-1' a 'Hub').
+    * 
+    * @return L'oggetto ServerAliases contenente le mappature
+    */
    public Config.ServerAliases getServerAliases() {
       return this.serverAliases;
    }
 
+/**
+    * getChatFilter
+    * Restituisce il filtro della chat utilizzato per regex e avvisi sui messaggi dei giocatori.
+    * 
+    * @return L'oggetto ChatFilter in memoria
+    */
    public Config.ChatFilter getChatFilter() {
       return this.chatFilter;
    }
@@ -939,3 +1072,4 @@ public class Config {
       ONLINE;
    }
 }
+
