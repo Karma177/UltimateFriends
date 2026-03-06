@@ -24,6 +24,7 @@
  * - Config:           Carica e memorizza le impostazioni dal file config.yml. Instanzia i moduli come Storage e Communication.
  * - Modelli Base:     PlayerProfile, Friend, Message, Options rappresentano la struttura logica in memoria degli oggetti utente.
  * 
+ * Original by M1nef4n. 
  * Port by Karma177, powered by Gemini 3.1 Pro. 
  * Note: Tutti i warning sono dovuti al developer originale e al suo utilizzo dei tipi.
  * Questa port è stata realizzata per essere il più funzionante possibile senza modificare la logica originale, ma alcune ottimizzazioni o refactor potrebbero essere necessari in futuro.
@@ -63,7 +64,7 @@ import com.velocityPort.migrate.MigrationCheck;
 import com.velocityPort.migrate.MigrationCheck.MigrationUnsuccessfulException;
 import com.velocityPort.storage.Storage;
 
-@Plugin(id = "ultimatefriends", name = "UltimateFriends_VelocityBranch", version = "1.0.0")
+@Plugin(id = "ultimatefriends", name = "UltimateFriends", version = "1.0.0")
 public class UltimateFriends {
    public static ProxyServer server;
    public static UltimateFriends plugin;
