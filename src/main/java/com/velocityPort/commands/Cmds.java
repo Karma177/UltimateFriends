@@ -7,9 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.annotation.Nullable;
-
 import com.velocityPort.ClickableMessage;
 import com.velocityPort.Config;
 import com.velocityPort.Friend;
@@ -29,29 +27,49 @@ import com.velocityPort.exceptions.PlayerAlreadyRequested;
 import com.velocityPort.exceptions.PlayerDenied;
 import com.velocityPort.exceptions.PlayerIsOffline;
 import com.velocityPort.exceptions.PlayerNotFriend;
-
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEvent.Action;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 
+/**
+ * Cmds
+ * Gestore principale dei comandi del plugin (/friends e alias).
+ * Implementa SimpleCommand di Velocity per gestire sub-comandi come add, remove, msg, bmsg, 
+ * connect e la gestione delle opzioni personali.
+ */
 public class Cmds implements SimpleCommand {
    public static HashMap<String, Long> cooledDown = new HashMap();
    private String cmd;
+   private String[] aliases;
    private int coolDown;
 
    public Cmds(String var1, String[] var2, @Nullable String var3, int var4) {
       this.coolDown = var4;
       this.cmd = var1;
+      this.aliases = var2;
    }
 
+   /**
+    * execute
+    * Reindirizza la chiamata di Velocity al metodo di esecuzione interno del plugin.
+    * 
+    * @param invocation Oggetto contenente sorgente e argomenti del comando.
+    */
    @Override
    public void execute(Invocation invocation) {
       this.execute(invocation.source(), invocation.arguments());
    }
 
+   /**
+    * execute
+    * Punto di ingresso principale per la logica dei comandi del plugin.
+    * Gestisce reload per console e tutte le sottoparti (msg, add, remove, etc) per i player.
+    * 
+    * @param var1 La sorgente che esegue il comando (Player o Console).
+    * @param var2 Gli argomenti passati al comando.
+    */
    public void execute(final CommandSource var1, String[] var2) {
       if (var2.length == 1 && var2[0].equalsIgnoreCase("reload")) {
          if (var1.hasPermission("ultimatefriends.reload")) {
@@ -353,6 +371,15 @@ public class Cmds implements SimpleCommand {
       }
    }
 
+   /**
+    * renderFriendsList
+    * Genera e invia al giocatore la visualizzazione grafica della lista amici in chat.
+    * Supporta l'ordinamento (alfabetico/online), la paginazione e i pulsanti interattivi.
+    * 
+    * @param var1 Il giocatore che visualizza la lista.
+    * @param var2 Il profilo del giocatore contenente i dati.
+    * @param var3 Mappa degli stati online (Server in cui si trovano gli amici).
+    */
    private void renderFriendsList(Player var1, PlayerProfile var2, final HashMap<String, String> var3) {
       Object var4 = new ArrayList(var2.getFriends());
       Config.SortType var5 = UltimateFriends.getConfig().getSort();
@@ -462,6 +489,13 @@ public class Cmds implements SimpleCommand {
       Utils.sendMessage(var1, Message.FRIEND_LIST_SPACER_BOTTOM.getMsg());
    }
 
+   /**
+    * renderOptions
+    * Mostra al giocatore il menu interattivo per la gestione delle preferenze personali.
+    * 
+    * @param var1 Il giocatore destinatario del menu.
+    * @param var2 Il profilo del giocatore associato.
+    */
    private void renderOptions(Player var1, PlayerProfile var2) {
       Utils.sendMessage(var1, Message.OPTIONS_SPACER_TOP.getMsg());
       Options var3 = var2.getOptions();
@@ -486,12 +520,26 @@ public class Cmds implements SimpleCommand {
       Utils.sendMessage(var1, Message.OPTIONS_SPACER_BOTTOM.getMsg());
    }
 
+   /**
+    * setCoolDown
+    * Registra il timestamp corrente per gestire il cooldown dei comandi anti-spam.
+    * 
+    * @param var1 Il giocatore che ha eseguito il comando.
+    * @return Il timestamp (long) in millisecondi.
+    */
    private long setCoolDown(Player var1) {
       long var2 = System.currentTimeMillis();
       cooledDown.put(var1.getUsername().toLowerCase(), var2);
       return var2;
    }
 
+   /**
+    * canUse
+    * Verifica se il giocatore ha superato il tempo di cooldown per l'uso del comando.
+    * 
+    * @param var1 Il giocatore da controllare.
+    * @return true se può eseguire il comando, false altrimenti.
+    */
    private boolean canUse(Player var1) {
       String var2 = var1.getUsername().toLowerCase();
       if (!cooledDown.containsKey(var2)) {
@@ -508,7 +556,23 @@ public class Cmds implements SimpleCommand {
       }
    }
 
+   /**
+    * getCmd
+    * Restituisce il comando principale configurato per il plugin.
+    * 
+    * @return Il nome del comando principale.
+    */
    public String getCmd() {
       return this.cmd;
+   }
+
+   /**
+    * getAliases
+    * Restituisce la lista degli alias alternativi associati al comando principale.
+    * 
+    * @return Un array di stringhe contenente gli alias.
+    */
+   public String[] getAliases() {
+      return this.aliases;
    }
 }

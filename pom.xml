@@ -35,9 +35,43 @@
 				<configuration>
 					<source>21</source>
 					<target>21</target>
+					<annotationProcessorPaths>
+                                            <path>
+                                                <groupId>com.velocitypowered</groupId>
+                                                <artifactId>velocity-api</artifactId>
+                                                <version>3.3.0-SNAPSHOT</version>
+                                            </path>
+                                        </annotationProcessorPaths>
 					<excludes>
 						<exclude>com/gmail/**</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.5.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<relocations>
+						<relocation>
+							<pattern>net.md_5.bungee.config</pattern>
+							<shadedPattern>com.velocityPort.libs.config</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>net.md_5.bungee.chat</pattern>
+							<shadedPattern>com.velocityPort.libs.chat</shadedPattern>
+						</relocation>
+					</relocations>
+					<transformers>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+					</transformers>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -73,6 +107,19 @@
 		    <groupId>com.imaginarycode.minecraft</groupId>
 		    <artifactId>RedisBungee</artifactId>
 		    <version>0.6.5</version>
+		</dependency>
+		<!-- Database Drivers -->
+		<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>8.0.33</version>
+				<scope>compile</scope>
+		</dependency>
+		<dependency>
+				<groupId>org.xerial</groupId>
+				<artifactId>sqlite-jdbc</artifactId>
+				<version>3.41.2.1</version>
+				<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>

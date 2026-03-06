@@ -23,18 +23,27 @@ import com.velocityPort.exceptions.PlayerAlreadyRequested;
 import com.velocityPort.exceptions.PlayerDenied;
 import com.velocityPort.exceptions.PlayerIsOffline;
 import com.velocityPort.exceptions.PlayerNotFriend;
-
 import net.kyori.adventure.text.event.HoverEvent.Action;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.event.EventManager;
 
+/**
+ * VelocityModule
+ * Implementazione nativa Velocity del CommunicationModule.
+ * Centralizza la logica di rete: gestione stato online, messaggistica privata,
+ * amicizie e spostamenti tra server per l'intera rete Proxy.
+ */
 public class VelocityModule implements CommunicationModule {
 
    private JoinListener joinListener;
    private DisconnectListener disconnectListener;
    private ServerSwitchListener serverSwitchListener;
 
+   /**
+    * registerListeners
+    * Registra gli eventi di join, uscita e cambio server presso l'EventManager di Velocity.
+    */
    public void registerListeners() {
       EventManager var1 = UltimateFriends.server.getEventManager();
       this.joinListener = new JoinListener();
@@ -45,14 +54,35 @@ public class VelocityModule implements CommunicationModule {
       var1.register(UltimateFriends.plugin, this.serverSwitchListener);
    }
 
+   /**
+    * isOnline
+    * Controlla se un giocatore è attualmente connesso a uno qualsiasi dei server del proxy.
+    * 
+    * @param var1 Nome del giocatore.
+    * @return true se online, false altrimenti.
+    */
    public boolean isOnline(String var1) {
       return UltimateFriends.server.getPlayer(var1).isPresent();
    }
 
+   /**
+    * getServer
+    * Ottiene il nome del server a cui il giocatore è attualmente connesso.
+    * 
+    * @param var1 Nome del giocatore.
+    * @return Il nome del server o null se offline.
+    */
    public String getServer(String var1) {
       return this.getServer(UltimateFriends.server.getPlayer(var1).orElse(null));
    }
 
+   /**
+    * getServer
+    * Ottiene il nome del server dall'oggetto Player di Velocity.
+    * 
+    * @param var1 L'istanza Player di Velocity.
+    * @return Il nome del server o null se l'utente non è connesso a un server backend.
+    */
    public String getServer(Player var1) {
       if (var1 == null) {
          return null;
@@ -62,6 +92,19 @@ public class VelocityModule implements CommunicationModule {
       }
    }
 
+   /**
+    * sendFriendMessage
+    * Gestisce l'invio di messaggi privati tra amici, effettuando controlli sui permessi,
+    * sullo stato online e sulla presenza di blocchi nei server.
+    * 
+    * @param var1 Profilo del mittente.
+    * @param var2 Nome del destinatario.
+    * @param var3 Contenuto del messaggio.
+    * @throws PlayerDenied se il destinatario ha disattivato i messaggi.
+    * @throws FriendOnDisabledServer se il destinatario è in un server dove il plugin è disattivato.
+    * @throws PlayerIsOffline se il destinatario si è disconnesso durante l'invio.
+    * @throws PlayerNotFriend se i due utenti non sono amici.
+    */
    public void sendFriendMessage(PlayerProfile var1, String var2, String var3) throws PlayerDenied, FriendOnDisabledServer, PlayerIsOffline, PlayerNotFriend {
       Friend var4 = var1.getFriend(var2);
       if (var4 != null) {
@@ -94,11 +137,26 @@ public class VelocityModule implements CommunicationModule {
       }
    }
 
+   /**
+    * sendFriendBroadcastMessage
+    * Invia un messaggio a tutti gli amici online del giocatore, utile per annunci di stato.
+    * 
+    * @param var1 Profilo del mittente.
+    * @param var2 Messaggio da trasmettere.
+    */
    public void sendFriendBroadcastMessage(PlayerProfile var1, String var2) {
       this.sendFriendBroadcastMessage0(var1, var2, (List)null);
       SocialSpy.spy(var1.getPlayerName(), "(Broadcast)", var2);
    }
 
+   /**
+    * sendFriendBroadcastMessage0
+    * Logica interna per l'iterazione sulla lista amici e l'invio fisico del messaggio.
+    * 
+    * @param var1 Profilo mittente.
+    * @param var2 Messaggio.
+    * @param var3 Lista opzionale dove raccogliere gli amici offline saltati.
+    */
    protected void sendFriendBroadcastMessage0(PlayerProfile var1, String var2, @Nullable List<String> var3) {
       Iterator var4 = var1.getFriends().iterator();
 
@@ -124,6 +182,14 @@ public class VelocityModule implements CommunicationModule {
 
    }
 
+   /**
+    * removeFriend
+    * Rimuove un'amicizia esistente sia in memoria che nel database per entrambi gli utenti coinvolti.
+    * 
+    * @param var1 Profilo che avvia la rimozione.
+    * @param var2 Istanza Friend da rimuovere.
+    * @throws PlayerNotFriend Se l'utente non è nella lista amici.
+    */
    public void removeFriend(PlayerProfile var1, Friend var2) throws PlayerNotFriend {
       if (!var1.getFriends().contains(var2)) {
          throw new PlayerNotFriend();
@@ -147,6 +213,22 @@ public class VelocityModule implements CommunicationModule {
       }
    }
 
+   /**
+    * addFriend
+    * Avvia o accetta una richiesta di amicizia. Gestisce le notifiche, i limiti massimi degli amici
+    * e i controlli incrociati delle richieste pendenti.
+    * 
+    * @param var1 Profilo che invia/accetta la richiesta.
+    * @param var2 Nome della persona da aggiungere.
+    * @return true se l'amicizia è stata conclusa (entrambi hanno accettato), false se è stata solo inviata la richiesta.
+    * @throws CannotAddYourself se var2 è il giocatore stesso.
+    * @throws FriendListExceeded se uno dei due ha raggiunto il limite di amici.
+    * @throws PlayerAlreadyFriend se sono già amici.
+    * @throws PlayerAlreadyRequested se la richiesta è stata già inviata in precedenza.
+    * @throws FriendOnDisabledServer se l'utente ricevente è in un server disabilitato.
+    * @throws PlayerDenied se il ricevente rifiuta le richieste per opzione.
+    * @throws PlayerIsOffline se il ricevente non è online.
+    */
    public boolean addFriend(PlayerProfile var1, String var2) throws CannotAddYourself, FriendListExceeded, PlayerAlreadyFriend, PlayerAlreadyRequested, FriendOnDisabledServer, PlayerDenied, PlayerIsOffline {
       if (var1.getPlayerName().equalsIgnoreCase(var2)) {
          throw new CannotAddYourself();
@@ -207,6 +289,17 @@ public class VelocityModule implements CommunicationModule {
    }
    }
 
+   /**
+    * connect
+    * Permette a un giocatore di connettersi istantaneamente al server in cui si trova il proprio amico (Teletrasporto).
+    * 
+    * @param var1 Profilo di chi desidera connettersi.
+    * @param var2 Nome dell'amico da raggiungere.
+    * @throws PlayerNotFriend se non sono amici.
+    * @throws FriendOnDisabledServer se l'amico è in un server protetto.
+    * @throws ConnectionDisabledOnServer se la funzione di teletrasporto è disattivata nel server di destinazione.
+    * @throws PlayerIsOffline se l'amico non è più in gioco.
+    */
    public void connect(PlayerProfile var1, String var2) throws PlayerNotFriend, FriendOnDisabledServer, ConnectionDisabledOnServer, PlayerIsOffline {
       Friend var3 = var1.getFriend(var2);
       if (var3 == null) {
@@ -235,7 +328,11 @@ public class VelocityModule implements CommunicationModule {
          }
       }
    }
-
+   
+   /**
+    * unregisterListeners
+    * Rimuove i listener registrati durante lo spegnimento del plugin.
+    */
    public void unregisterListeners() {
       EventManager var1 = UltimateFriends.server.getEventManager();
       if (this.joinListener != null) {

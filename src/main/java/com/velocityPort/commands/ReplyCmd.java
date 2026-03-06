@@ -7,13 +7,30 @@ import com.velocityPort.PlayerProfile;
 import com.velocityPort.UltimateFriends;
 import com.velocityPort.Utils;
 
+/**
+ * ReplyCmd
+ * Comando per rispondere rapidamente all'ultimo messaggio privato ricevuto.
+ * Identifica l'ultimo mittente dal profilo e reindirizza a MsgCmd.
+ */
 public class ReplyCmd implements SimpleCommand {
    private String cmd;
 
+   /**
+    * ReplyCmd
+    * Costruttore del comando di risposta.
+    * 
+    * @param var1 Nome del comando configurato.
+    */
    public ReplyCmd(String var1) {
       this.cmd = var1;
    }
 
+   /**
+    * execute
+    * Punto di ingresso Velocity. Verifica l'ultimo mittente e inoltra il messaggio.
+    * 
+    * @param invocation Oggetto contenente sorgente e argomenti.
+    */
    @Override
    public void execute(Invocation invocation) {
       CommandSource var1 = invocation.source();
@@ -33,6 +50,12 @@ public class ReplyCmd implements SimpleCommand {
       }
    }
 
+   /**
+    * getCmd
+    * Restituisce il comando principale.
+    * 
+    * @return Il comando.
+    */
    public String getCmd() {
       return this.cmd;
    }

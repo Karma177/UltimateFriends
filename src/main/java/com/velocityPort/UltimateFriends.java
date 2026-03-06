@@ -1,33 +1,34 @@
-﻿/*
- * =========================================================================================
- * DIARIO DI BORDO & PROMPT PER IL TE STESSO DI DOMANI
- * =========================================================================================
- *
- * [DA FARE]
- * Commentare bene tutto
+﻿/**
+ * UltimateFriends - Velocity Port
  * 
- * [COSA ABBIAMO FATTO IN QUESTA SESSIONE]
- * 1. Iniziato il porting del plugin da Bungee a Velocity, partendo da UltimateFriends.java. Abbiamo adattato l'entry point del plugin, gestito l'inizializzazione e la chiusura del proxy, e preparato il terreno
- * 2. SocialSpy.java: Convertito da Bungee a Velocity. Gestiti correttamente gli 'Optional' per ritrovare i Player a runtime.
- * 3. ClickableMessage.java: Rimosso completamente Bungee (BaseComponent, ChatColor, ComponentBuilder) e 
- *    sostituito con le API testuali di default di Velocity, ovvero Kyori Adventure (Component, NamedTextColor, LegacyComponentSerializer).
- * 4. Storage & MySQL: Convertito il pacchetto stoccaggio senza errori, portando dietro @CheckReturnValue.
- * 5. HookManager: Tradotti i ProxiedPlayer in Player e ServerInfo in RegisteredServer. Trasferimento giocatori ora via 'createConnectionRequest'.
- * 6. Comandi iniziali: Abbiamo cominciato in 'commands/' a portare 'MsgCmd.java', 'ReplyCmd.java' e 'Cmds.java' in SimpleCommand, 
- *    adattando CommandSender a CommandSource. Abbiamo creato in 'Utils.runAsync' un comodo wrapper per non impazzire con parentesi nei thread in Cmds.
+ * Questo progetto è il port nativo per Velocity del plugin UltimateFriends. 
+ * Di seguito viene descritta l'architettura principale e lo scopo di ogni package:
  * 
- * [PROSSIMO OBIETTIVO E DIRETTIVE - LEGGI BENE!]
- * - OBIETTIVO IMMEDIATO: Finire di sistemare gli errori in Cmds.java e ListPaginator (errori relativi a 'sendMessage(String)' 
- *   che deve diventare invio di 'Component' in Adventure).
- * - OBIETTIVO SUCCESSIVO: Migrare il sistema di eventi (listeners) da 'communication/bungee'.
+ * Struttura dei Package:
+ * - commands/:        Contiene le classi per la definizione e gestione dei comandi in-game (es. /friends, /msg, /reply). 
+ *                     Si interfaccia con il CommandManager di Velocity.
+ * - communication/:   Gestisce il sistema di messaggistica interna tra il Proxy (Velocity) e i sub-servers (backend) 
+ *                     o altri moduli per trasmettere azioni cross-server.
+ * - exceptions/:      Raggruppa e gestisce le eccezioni custom generate durante l'esecuzione (es. timeout database, errori formattazione).
+ * - hook/:            Sistema di integrazione con plugin di terze parti o API esterne. Permette di registrare o attivare 
+ *                     "ganci" (es. interazioni con vanish o party plugin).
+ * - jsql/:            Modulo interno per la creazione e astrazione di query SQL (Query Builder). Fornisce un livello agnostico
+ *                     tra il codice Java e le differenze sintattiche SQL.
+ * - migrate/:         Script e logiche dedicate alla migrazione retroattiva dei dati dai vecchi sistemi di archiviazione 
+ *                     (come file piatti yaml o plugin legacy di BungeeCord) verso i nuovi database.
+ * - storage/:         Interfacce e implementazioni di database reali (es. cartella mysql/, sqlite/). 
+ *                     Gestisce la connessione JDBC cruda e la serializzazione/deserializzazione dei dati permanenti.
  * 
- * -> LE REGOLE D'ORO DA RISPETTARE <-
- * 1. K.I.S.S. (Keep It Simple, Stupid)! Codice chiaro, diretto, basico, pulito.
- * 2. PROCEDI LENTAMENTE (FILE BY FILE). Questa è una regola ferrea dettata dall'utente: l'Ai è veloce, l'umano è comprensibilmente 
- *    più lento. Metti le mani su MASSIMO UN FILE per volta e spiegagli i passaggi in maniere umane e dirette! Niente passaggi in blocchi giganti.
- * 3. NON INVENTARE CODICE. Controlla SEMPRE l'esistenza delle feature/metodi nel codice originario di base (es. come successo con "removeFriendFromCache") prima di aggiungerne versioni Velocity.
- * 4. FERMATI e chiedi all'utente prima di migrare nuove features importanti. Chiedigli conferma, sempre.
- * =========================================================================================
+ * Classi Root Principali:
+ * - UltimateFriends:  Classe Core (Entry-point). Sottoscrive gli eventi proxy (inizializzazione, chiusura) e fa da orchestratore.
+ * - Config:           Carica e memorizza le impostazioni dal file config.yml. Instanzia i moduli come Storage e Communication.
+ * - Modelli Base:     PlayerProfile, Friend, Message, Options rappresentano la struttura logica in memoria degli oggetti utente.
+ * 
+ * Port by Karma177, powered by Gemini 3.1 Pro. 
+ * Note: Tutti i warning sono dovuti al developer originale e al suo utilizzo dei tipi.
+ * Questa port è stata realizzata per essere il più funzionante possibile senza modificare la logica originale, ma alcune ottimizzazioni o refactor potrebbero essere necessari in futuro.
+ * Le uniche cose che sono state modificate le chiamate alle API bungee, sostituite con le equivalenti di Velocity.
+ * Version 1.0.0 - Prima release per velocity. Versione non ancora testata estensivamente.
  */
 package com.velocityPort;
 
@@ -62,7 +63,7 @@ import com.velocityPort.migrate.MigrationCheck;
 import com.velocityPort.migrate.MigrationCheck.MigrationUnsuccessfulException;
 import com.velocityPort.storage.Storage;
 
-@Plugin(id = "ultimatefriends", name = "UltimateFriends", version = "2.7.2")
+@Plugin(id = "ultimatefriends", name = "UltimateFriends_VelocityBranch", version = "1.0.0")
 public class UltimateFriends {
    public static ProxyServer server;
    public static UltimateFriends plugin;
@@ -108,7 +109,7 @@ public class UltimateFriends {
     * Recupera il profilo di un giocatore dalla memoria cache.
     * 
     * @param var0 Il nome del giocatore (solitamente minuscolo/case-insensitive)
-    * @return L'oggetto PlayerProfile associato, o null se non è online o non è trovato
+    * @return L'oggetto PlayerProfile associato, o null se non ? online o non ? trovato
     */
    public static PlayerProfile getPlayerProfile(String var0) {
       if (var0 == null) {
@@ -257,7 +258,6 @@ public class UltimateFriends {
    public void onProxyInitialization(ProxyInitializeEvent event) {
       long var1 = System.currentTimeMillis();
       plugin = this;
-      server = server; // already set via inject
       if (!this.getDataFolder().exists() && !this.getDataFolder().mkdir()) {
          logger.error("Cannot create plugin folder!");
       } else if (this.copyFiles()) {
@@ -302,7 +302,31 @@ public class UltimateFriends {
             communicationModule.registerListeners();
             logger.info("Registering commands...");
             
-            // Note: commands and listeners registration will need specific velocity adjustments too!
+            com.velocitypowered.api.command.CommandManager commandManager = server.getCommandManager();
+
+            com.velocityPort.commands.Cmds cmds = config.getCmds();
+            if (cmds != null) {
+               commandManager.register(
+                  commandManager.metaBuilder(cmds.getCmd()).aliases(cmds.getAliases() != null ? cmds.getAliases() : new String[0]).build(),
+                  cmds
+               );
+            }
+
+            com.velocityPort.commands.MsgCmd msgCmd = config.getMsgCmd();
+            if (msgCmd != null) {
+               commandManager.register(
+                  commandManager.metaBuilder(msgCmd.getCmd()).build(),
+                  msgCmd
+               );
+            }
+
+            com.velocityPort.commands.ReplyCmd replyCmd = config.getReplyCmd();
+            if (replyCmd != null) {
+               commandManager.register(
+                  commandManager.metaBuilder(replyCmd.getCmd()).build(),
+                  replyCmd
+               );
+            }
             
             logger.info("All done in " + (System.currentTimeMillis() - var1) + " ms");
             logger.info("Enabled");

@@ -10,15 +10,24 @@ import com.velocityPort.Utils;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent.Action;
-
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 
+/**
+ * JoinListener
+ * Gestisce l'evento di ingresso (PostLoginEvent) di un giocatore nel proxy Velocity.
+ * Si occupa del caricamento asincrono del profilo dal database e della notifica agli amici online.
+ */
 public class JoinListener {
+   /**
+    * onJoin
+    * Metodo callback eseguito dopo che un giocatore ha effettuato l'accesso con successo.
+    * 
+    * @param var1 L'evento di post-login fornito da Velocity.
+    */
    @Subscribe
    public void onJoin(PostLoginEvent var1) {
       if (!UltimateFriends.shuttingDown) {
@@ -47,6 +56,14 @@ public class JoinListener {
       }
    }
 
+   /**
+    * sendJoinMsg
+    * Invia un messaggio di notifica interattivo a tutti gli amici online dell'utente che è entrato.
+    * Il messaggio include un'azione per rispondere rapidamente (tooltip e suggest command).
+    * 
+    * @param var1 Il nome del giocatore appena entrato.
+    * @param var2 La lista dei nomi degli amici da notificare.
+    */
    protected final void sendJoinMsg(String var1, List<String> var2) {
       Iterator var3 = var2.iterator();
 

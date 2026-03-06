@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
-import java.util.Optional;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
@@ -18,7 +17,6 @@ public class Utils {
 
    /**
     * toStringList
-    * Converte una lista generica in una lista di stringhe chiamando toString() su ciascun elemento.
     * 
     * @param var0 La lista originale di elementi
     * @return La lista convertita che contiene la rappresentazione stringa degli elementi
@@ -41,7 +39,6 @@ public class Utils {
 
    /**
     * concat
-    * Concatena due array generici restituendo un nuovo array unito.
     * 
     * @param var0 Il primo array
     * @param var1 Il secondo array
@@ -59,7 +56,6 @@ public class Utils {
 
    /**
     * concat (Component)
-    * Concatena due array di Componenti testuali.
     * 
     * @param var0 Il primo array di Componenti
     * @param var1 Il secondo array di Componenti
@@ -76,7 +72,6 @@ public class Utils {
 
    /**
     * ordinalIndexOf
-    * Trova l'indice dell'N-esima occorrenza di una sottostringa.
     * 
     * @param var0 La stringa in cui cercare
     * @param var1 La sottostringa da cercare
@@ -98,7 +93,6 @@ public class Utils {
 
    /**
     * join
-    * Unisce un array di stringhe utilizzando un delimitatore.
     * 
     * @param var0 Il delimitatore
     * @param var1 Gli elementi stringa da unire
@@ -110,7 +104,6 @@ public class Utils {
 
    /**
     * join (Collection)
-    * Unisce gli elementi di una Collection in una stringa utilizzando un delimitatore.
     * 
     * @param var0 Il delimitatore
     * @param var1 Gli elementi Collection da unire
@@ -142,7 +135,6 @@ public class Utils {
 
    /**
     * containsIgnoreCase
-    * Verifica se una determinata stringa è presente in una lista ignorando maiuscole e minuscole.
     * 
     * @param var0 La lista di stringhe
     * @param var1 La stringa da verificare ignorando i caratteri maiuscoli o minuscoli
@@ -165,7 +157,6 @@ public class Utils {
 
    /**
     * isNameValid
-    * Valida il nome di un giocatore assicurandosi che sia alfanumerico e non superi i 16 caratteri.
     * 
     * @param var0 Il nome del giocatore da validare
     * @return true se non supera 16 caratteri ed è alfanumerico
@@ -176,7 +167,6 @@ public class Utils {
 
    /**
     * safeConnect
-    * Connette in sicurezza un giocatore a un server specificato.
     * 
     * @param var0 Il giocatore da connettere
     * @param var1 Il server a cui inviarlo
@@ -185,7 +175,7 @@ public class Utils {
       try {
          // ! to review
          // L'Hook in Velocity si connette usando il sistema createConnectionRequest o un hook convertito.
-         // Per ora simuliamo/prepariamo la chiamata con il manager convertito. (RichiederÃ  HookManager Velocity)
+         // Per ora simuliamo/prepariamo la chiamata con il manager convertito. (Richiederà HookManager Velocity)
          // UltimateFriends.getHookManager().connectPlayer(var0, var1);
          var0.createConnectionRequest(var1).fireAndForget();
       } catch (Throwable var3) {
@@ -196,7 +186,6 @@ public class Utils {
 
    /**
     * formatTime
-    * Formatta un timestamp (in millisecondi) come data leggibile.
     * 
     * @param var0 Il tempo in millisecondi (timestamp)
     * @return La data formattata in base al formato specificato in Config
@@ -207,7 +196,6 @@ public class Utils {
 
    /**
     * runAsync
-    * Esegue un Runnable in modo asincrono sul thread pool di Velocity.
     * 
     * @param r Il Runnable da eseguire asincronamente nel proxy
     */
@@ -217,7 +205,6 @@ public class Utils {
 
    /**
     * sendMessage (legacy)
-    * Invia un messaggio testuale utilizzando la sintassi legacy Bungee/Spigot.
     * 
     * @param source La fonte che riceve il messaggio
     * @param message Il testo Legacy (con codici '&') da inviare
@@ -229,7 +216,6 @@ public class Utils {
 
    /**
     * sendMessage (Component)
-    * Invia un messaggio di testo utilizzando i Component Kyori Adventure nativi.
     * 
     * @param source La fonte che riceve il messaggio
     * @param message Componente pronto Kyori Adventure da inviare
@@ -239,6 +225,4 @@ public class Utils {
       source.sendMessage(message);
    }
 }
-
-
 

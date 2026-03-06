@@ -19,28 +19,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
-
-import com.gmail.holubvojtech.jsql.connectors.DatabaseConnector;
+import com.velocityPort.jsql.connectors.DatabaseConnector;
 import com.velocityPort.commands.Cmds;
 import com.velocityPort.commands.MsgCmd;
 import com.velocityPort.commands.ReplyCmd;
 import com.velocityPort.communication.CommunicationModule;
 import com.velocityPort.storage.Storage;
 import com.velocityPort.storage.mysql.MySQL;
-import com.velocityPort.storage.mysql.MySQL;
-
 import net.md_5.bungee.api.ChatColor;
-import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.Player;
-
 /* 
  * NOTA SUL PORTING: 
- * Manteniamo i pacchetti orginali net.md_5.bungee.config per seguire il principio KISS (Keep It Simple, Stupid).
- * Questo evita di dover riscrivere l'intera logica di lettura e scrittura dei file YAML 
- * con librerie native di Velocity (Sponge Configurate), garantendo perfetta retrocompatibilità 
+ * Manteniamo i pacchetti orginali net.md_5.bungee.config.
+ * Questo evita di dover riscrivere l'intera logica di lettura e scrittura dei file YAML
+ * con librerie native di Velocity (Sponge Configurate), garantendo perfetta retrocompatibilità
  * con i vecchi file di configurazione degli utenti.
+ * Note: Sono package indipendenti, non dipendendono da bungee in alcun modo.
  */
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -91,6 +86,12 @@ public class Config {
       this.loadFilterLog();
    }
 
+   /**
+    * reload
+    * Ricarica la configurazione dal file su disco e aggiorna tutte le impostazioni e moduli in memoria.
+    * 
+    * @throws IOException Se c'è un errore nella lettura del file
+    */
    public void reload() throws IOException {
       this.config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.configFile);
       this.loadServerAliases();
@@ -104,66 +105,163 @@ public class Config {
       this.loadFilterLog();
    }
 
+   /**
+    * getConfig
+    * Restituisce l'oggetto Configuration di Velocity (basato su YamlConfiguration) caricato in memoria.
+    * 
+    * @return La struttura dati della configurazione principale
+    */
    public Configuration getConfig() {
       return this.config;
    }
 
+   /**
+    * getStorage
+    * Restituisce il modulo Storage responsabile dell'uso del database (MySQL in questo caso).
+    * 
+    * @return L'istanza generica del database di Storage
+    */
    public Storage getStorage() {
       return this.storage;
    }
 
+   /**
+    * getCmds
+    * Restituisce l'istanza dei comandi generali.
+    * 
+    * @return Il setup Cmds legato al plugin
+    */
    public Cmds getCmds() {
       return this.cmds;
    }
 
+   /**
+    * getReplyCmd
+    * Restituisce l'istanza del comando /reply che intercetta i PM di sistema.
+    * 
+    * @return L'istanza ReplyCmd
+    */
    public ReplyCmd getReplyCmd() {
       return this.replyCmd;
    }
 
+   /**
+    * getMsgCmd
+    * Restituisce l'istanza del comando /msg.
+    * 
+    * @return L'istanza MsgCmd
+    */
    public MsgCmd getMsgCmd() {
       return this.msgCmd;
    }
 
+   /**
+    * getMsgOverride
+    * Ritorna la dicitura opzionale definita nella stringa 'msgOverride' se usata per reindirizzare la chat.
+    * 
+    * @return La stringa definita per l'override dei msg
+    */
    public String getMsgOverride() {
       return this.msgOverride;
    }
 
+   /**
+    * getLanguageLoader
+    * Restituisce il gestore dei file di linguaggio caricato dall'utente.
+    * 
+    * @return L'istanza LanguageLoader
+    */
    public LanguageLoader getLanguageLoader() {
       return this.languageLoader;
    }
 
+   /**
+    * getCore
+    * Restituisce i settaggi base (Core) della configurazione.
+    * 
+    * @return L'oggetto Config.Core contenente i valori vitali
+    */
    public Config.Core getCore() {
       return this.core;
    }
 
+   /**
+    * getCommunicationModule
+    * Restituisce il modulo di comunicazione network tra le istanze cross-server.
+    * 
+    * @return L'istanza di CommunicationModule associata a questa configurazione
+    */
    public CommunicationModule getCommunicationModule() {
       return this.communicationModule;
    }
 
+   /**
+    * getOptions
+    * Restituisce le opzioni generali del plugin configurate dall'utente.
+    * 
+    * @return L'oggetto Options
+    */
    public Config.Options getOptions() {
       return this.options;
    }
 
+   /**
+    * getDisable
+    * Restituisce le impostazioni di disattivazione relative a server, filtri, ecc.
+    * 
+    * @return L'oggetto Disable
+    */
    public Config.Disable getDisable() {
       return this.disable;
    }
 
+   /**
+    * getMaxFriends
+    * Restituisce il numero globale massimo di amici consentiti per giocatore.
+    * 
+    * @return Un intero indicante il tetto massimo degli amici
+    */
    public int getMaxFriends() {
       return this.maxFriends;
    }
 
+   /**
+    * getSort
+    * Restituisce il metodo di ordinamento della lista amici configurato (es. ALPHA, ONLINE).
+    * 
+    * @return Il tipo di ordinamento SortType
+    */
    public Config.SortType getSort() {
       return this.sort;
    }
 
+   /**
+    * getPerPage
+    * Restituisce il numero di amici da mostrare per ogni pagina della friend-list.
+    * 
+    * @return Il limite di elementi per pagina
+    */
    public int getPerPage() {
       return this.perPage;
    }
 
+   /**
+    * getDateFormat
+    * Restituisce il formattatore di date configurato (utilizzato per i last-login ecc.).
+    * 
+    * @return SimpleDateFormat inizializzato secondo la stringa della configurazione
+    */
    public SimpleDateFormat getDateFormat() {
       return this.dateFormat;
    }
 
+   /**
+    * getMaxFriends (Player)
+    * Recupera il limite di amici consentito basandosi sui permessi di un giocatore specifico.
+    * 
+    * @param var1 Il Player di cui controllare i permessi (nullable)
+    * @return L'intero che rappresenta il massimo di amici consentiti per questo utente
+    */
    public int getMaxFriends(Player var1) {
       if (var1 == null) {
          return this.getMaxFriends();
@@ -195,26 +293,60 @@ public class Config {
       }
    }
 
+/**
+    * getPlayerLookup
+    * Restituisce l'interfaccia di ricerca giocatori online e offline.
+    * 
+    * @return L'oggetto PlayerLookup corrente
+    */
    public PlayerLookup getPlayerLookup() {
       return this.playerLookup;
    }
 
+/**
+    * getDefaultSocialSpyPlayers
+    * Restituisce la lista di giocatori che hanno lo spionaggio dei messaggi privati (SocialSpy) abilitato di default.
+    * 
+    * @return Una lista di stringhe con i nomi dei giocatori
+    */
    public List<String> getDefaultSocialSpyPlayers() {
       return this.defaultSocialSpyPlayers;
    }
 
+/**
+    * getCustomButtons
+    * Restituisce la lista dei pulsanti personalizzati configurati per apparire sui messaggi (es. Accetta/Rifiuta).
+    * 
+    * @return Una lista di CustomButton
+    */
    public List<Config.CustomButton> getCustomButtons() {
       return this.customButtons;
    }
 
+/**
+    * getServerAliases
+    * Restituisce gli alias configurati per i server (es. da 'lobby-1' a 'Hub').
+    * 
+    * @return L'oggetto ServerAliases contenente le mappature
+    */
    public Config.ServerAliases getServerAliases() {
       return this.serverAliases;
    }
 
+/**
+    * getChatFilter
+    * Restituisce il filtro della chat utilizzato per regex e avvisi sui messaggi dei giocatori.
+    * 
+    * @return L'oggetto ChatFilter in memoria
+    */
    public Config.ChatFilter getChatFilter() {
       return this.chatFilter;
    }
 
+/**
+    * loadFilterLog
+    * Carica la configurazione del log dei filtri chat dal file config.yml.
+    */
    private void loadFilterLog() {
       this.filterLog = new Config.ChatLogger();
       this.filterLog.enabled = this.config.getBoolean("chat.filterLog.enabled", false);
@@ -222,6 +354,10 @@ public class Config {
       this.filterLog.format = this.config.getString("chat.filterLog.format", this.filterLog.format);
    }
 
+/**
+    * loadChatFilters
+    * Carica i filtri regex per la chat, se presenti nella configurazione.
+    */
    private void loadChatFilters() {
       this.chatFilter = new Config.ChatFilter();
       Configuration var1 = this.config.getSection("chat.filters");
@@ -245,10 +381,18 @@ public class Config {
 
    }
 
+/**
+    * loadServerAliases
+    * Carica gli alias dei vari server connessi al proxy (es per mostrare nomi migliori nella GUI).
+    */
    private void loadServerAliases() {
       this.serverAliases = new Config.ServerAliases(this.config.getStringList("serverAliases"));
    }
 
+/**
+    * loadCustomButtons
+    * Carica i bottoni personalizzati dalla configurazione.
+    */
    private void loadCustomButtons() {
       this.customButtons = new ArrayList<>();
       List<String> var1 = this.config.getStringList("customButtons");
@@ -264,10 +408,18 @@ public class Config {
 
    }
 
+/**
+    * loadDefaultSocialSpyPlayers
+    * Carica la lista dei giocatori che devono avere lo staff-spy attivato di default.
+    */
    private void loadDefaultSocialSpyPlayers() {
       this.defaultSocialSpyPlayers = this.config.getStringList("socialSpy.default");
    }
 
+/**
+    * loadDisable
+    * Carica la lista delle funzioni o dei server disabilitati nelle impostazioni.
+    */
    private void loadDisable() {
       this.disable = new Config.Disable();
       this.disable.setConnection(this.config.getStringList("disable.connection"));
@@ -276,6 +428,10 @@ public class Config {
       this.disable.setOnlineStatus(this.config.getStringList("disable.onlineStatus"));
    }
 
+/**
+    * loadOptions
+    * Carica le opzioni globali e preferenze base per il plugin.
+    */
    private void loadOptions() {
       this.options = new Config.Options();
       this.options.getDefaults().setShow_msg_join(this.config.getBoolean("options.default.show_msg_join", true));
@@ -286,10 +442,18 @@ public class Config {
       this.options.getDefaults().setShow_broadcast(this.config.getBoolean("options.default.show_broadcast", true));
    }
 
+/**
+    * loadCommunication
+    * Inizializza il modulo di comunicazione (Redis o Bungee/Velocity channel).
+    */
    private void loadCommunication() {
-       // this.communicationModule = new BungeeModule(); // Da sostituire con VelocityModule
+       this.communicationModule = new com.velocityPort.communication.velocity.VelocityModule();
    }
 
+/**
+    * loadPlayerLookup
+    * Inizializza il provider di lookup per i profili e nomi utente.
+    */
    private void loadPlayerLookup() {
       String var1 = this.config.getString("playerLookup.type");
       if (var1.equalsIgnoreCase("name")) {
@@ -308,6 +472,10 @@ public class Config {
 
    }
 
+/**
+    * loadCore
+    * Carica le variabili costanti e vitali del Core (versioni, channel etc).
+    */
    private void loadCore() {
       this.core = new Config.Core();
       this.core.setVer(this.config.getInt("core.ver"));
@@ -355,6 +523,10 @@ public class Config {
       this.dateFormat = new SimpleDateFormat(this.config.getString("language.dateFormat", "dd.MM. HH:mm"));
    }
 
+/**
+    * loadMaxFriends
+    * Carica il limite massimo di amici globale ed eventuali limiti a gruppi/permessi.
+    */
    private void loadMaxFriends() {
       this.maxFriends = this.config.getInt("friendList.maxFriends", 24);
       this.maxFriendsGroup = new HashMap<>();
@@ -379,6 +551,10 @@ public class Config {
       this.perPage = this.config.getInt("friendList.perPage", -1);
    }
 
+/**
+    * loadCommands
+    * Carica alias, attivazioni ed override di tutti i comandi relativi agi amici e messaggi.
+    */
    private void loadCommands() {
       int var1 = this.config.getInt("commands.coolDown", 1500);
       String var2 = this.config.getString("commands.cmd", "f");
@@ -401,6 +577,10 @@ public class Config {
       this.msgOverride = this.config.getString("commands.override.msg", (String)null);
    }
 
+/**
+    * loadStorage
+    * Inizializza la tipologia di salvataggio (es MySQL) configurata e ne stabilisce la connessione.
+    */
    private void loadStorage() {
       String var1 = this.config.getString("storage.module", "");
       final String var2;
@@ -414,6 +594,12 @@ public class Config {
          final boolean var8 = this.config.getBoolean("storage.mysql.autoReconnect");
          final boolean var9 = this.config.getBoolean("storage.mysql.ignoreSsl");
          DatabaseConnector var10 = new DatabaseConnector() {
+/**
+    * connect
+    * Genera la connessione al database SQL secondo i parametri della configurazione caricata.
+    * 
+    * @return La connessione SQL stabilita, oppure null in caso di errore.
+    */
             public Connection connect() {
                String var1 = "jdbc:mysql://" + var2 + ":" + var3;
                if (var4 != null) {
@@ -430,20 +616,32 @@ public class Config {
                }
 
                try {
+                  Class.forName("com.mysql.cj.jdbc.Driver");
                   return DriverManager.getConnection(var1, var5, var6);
-               } catch (SQLException var3x) {
+               } catch (SQLException | ClassNotFoundException var3x) {
                   var3x.printStackTrace();
                   return null;
                }
             }
          };
          this.storage = new MySQL(var10);
+      } else if (var1.equalsIgnoreCase("sqlite")) {
+         String fileStr = this.config.getString("storage.sqlite.file");
+         java.io.File file = new java.io.File(UltimateFriends.plugin.getDataFolder(), fileStr);
+         com.velocityPort.jsql.connectors.SQLiteConnector connector = new com.velocityPort.jsql.connectors.SQLiteConnector(file);
+         this.storage = new com.velocityPort.storage.sqlite.SQLite(connector);
       } else {
-    	  throw new IllegalArgumentException("Unknown storage");
+          throw new IllegalArgumentException("Unknown storage");
       }
 
    }
 
+/**
+    * notNull
+    * Un semplice assert proxy interno per tirare eccezione se l'oggetto è null.
+    * 
+    * @param var1 Oggetto da controllare
+    */
    private void notNull(Object var1) {
       if (var1 == null) {
          throw new NullPointerException();
@@ -479,11 +677,23 @@ public class Config {
          this.allowUuidInOfflineMode = false;
       }
 
-      public String[] getRedisChannels() {
+/**
+    * getRedisChannels
+    * Ritorna i canali redis impiegati dal network proxy.
+    * 
+    * @return Un array di stringhe che indicano i channel Redis in uso
+    */
+   public String[] getRedisChannels() {
          return new String[]{this.redis_channel_friendRequest, this.redis_channel_friendRemove, this.redis_channel_friendMessage, this.redis_channel_friendBroadcast};
       }
 
-      public int ver() {
+/**
+    * ver
+    * Ritorna la versione indicata nel config.
+    * 
+    * @return Numero di versione
+    */
+   public int ver() {
          return this.ver;
       }
 
@@ -491,7 +701,13 @@ public class Config {
          this.ver = var1;
       }
 
-      public String gtApiPass() {
+/**
+    * gtApiPass
+    * Recupera la password delle chiamate per le API esterne.
+    * 
+    * @return La password associata per l'API
+    */
+   public String gtApiPass() {
          return this.gtApiPass;
       }
 
@@ -500,7 +716,13 @@ public class Config {
          this.gtApiPass = var1;
       }
 
-      public boolean resetLang() {
+/**
+    * resetLang
+    * Indica se il file delle lingue deve essere sovrascritto ad ogni avvio.
+    * 
+    * @return true se il reset è abilitato, false altrimenti
+    */
+   public boolean resetLang() {
          return this.resetLang;
       }
 
@@ -509,7 +731,13 @@ public class Config {
          this.resetLang = var1;
       }
 
-      public String redis_msgSplit() {
+/**
+    * redis_msgSplit
+    * Ritorna il carattere usato per separare i dati nei payload Redis.
+    * 
+    * @return Il separatore scelto
+    */
+   public String redis_msgSplit() {
          return this.redis_msgSplit;
       }
 
@@ -518,7 +746,13 @@ public class Config {
          this.redis_msgSplit = var1;
       }
 
-      public String redis_channel_friendRequest() {
+/**
+    * redis_channel_friendRequest
+    * Ritorna il nome del sub-channel dedicato alle richieste d'amicizia via Redis.
+    * 
+    * @return Nome sub-channel
+    */
+   public String redis_channel_friendRequest() {
          return this.redis_channel_friendRequest;
       }
 
@@ -527,7 +761,13 @@ public class Config {
          this.redis_channel_friendRequest = var1;
       }
 
-      public String redis_channel_friendRemove() {
+/**
+    * redis_channel_friendRemove
+    * Ritorna il nome del sub-channel dedicato alle rimozioni d'amicizia via Redis.
+    * 
+    * @return Nome sub-channel
+    */
+   public String redis_channel_friendRemove() {
          return this.redis_channel_friendRemove;
       }
 
@@ -536,7 +776,13 @@ public class Config {
          this.redis_channel_friendRemove = var1;
       }
 
-      public String redis_channel_friendMessage() {
+/**
+    * redis_channel_friendMessage
+    * Ritorna il nome del sub-channel dedicato ai messaggi privati via Redis.
+    * 
+    * @return Nome sub-channel
+    */
+   public String redis_channel_friendMessage() {
          return this.redis_channel_friendMessage;
       }
 
@@ -545,7 +791,13 @@ public class Config {
          this.redis_channel_friendMessage = var1;
       }
 
-      public String redis_channel_friendBroadcast() {
+/**
+    * redis_channel_friendBroadcast
+    * Ritorna il nome del sub-channel dedicato ai messaggi globali broadcast (es. accessi) via Redis.
+    * 
+    * @return Nome sub-channel
+    */
+   public String redis_channel_friendBroadcast() {
          return this.redis_channel_friendBroadcast;
       }
 
@@ -554,9 +806,16 @@ public class Config {
          this.redis_channel_friendBroadcast = var1;
       }
 
-      /** @deprecated */
-      @Deprecated
-      public String db_tables_fList() {
+   
+   /** */
+   /**
+    * db_tables_fList
+    * Ritorna la tabella del DB associata alla memorizzazione della lista amici.
+    * 
+    * @return Stringa nome tabella
+    * Da rimuovere o rinominare secondo le direttive del nuovo storage
+    */
+   public String db_tables_fList() {
          return this.db_tables_fList;
       }
 
@@ -565,9 +824,16 @@ public class Config {
          this.db_tables_fList = var1;
       }
 
-      /** @deprecated */
-      @Deprecated
-      public String db_tables_options() {
+      /** */
+
+/**
+    * db_tables_options
+    * Ritorna la tabella DB associata alle opzioni globali del plugin.
+    * 
+    * @return Stringa nome tabella
+    * Da rimuovere o rinominare secondo lo schema corrente
+    */
+   public String db_tables_options() {
          return this.db_tables_options;
       }
 
@@ -576,7 +842,13 @@ public class Config {
          this.db_tables_options = var1;
       }
 
-      public boolean isUuidNotUnique() {
+/**
+    * isUuidNotUnique
+    * Ritorna se il server accetta UUID non univoche (es server craccati/offline).
+    * 
+    * @return true se attiva questa impostazione, false altrimenti
+    */
+   public boolean isUuidNotUnique() {
          return this.uuidNotUnique;
       }
 
@@ -584,7 +856,13 @@ public class Config {
          this.uuidNotUnique = var1;
       }
 
-      public boolean isAllowUuidInOfflineMode() {
+/**
+    * isAllowUuidInOfflineMode
+    * Ritorna se ai server offline è concesso l'uso dell'UUID generato da Mojang e proxy.
+    * 
+    * @return true se ammesso, false altrimenti
+    */
+   public boolean isAllowUuidInOfflineMode() {
          return this.allowUuidInOfflineMode;
       }
 
@@ -607,7 +885,13 @@ public class Config {
       private Disable() {
       }
 
-      public List<String> getConnectionFrom() {
+/**
+    * getConnectionFrom
+    * Ritorna l'elenco dei server dai quali non sono permesse connessioni al proxy.
+    * 
+    * @return Una lista di server disabilitati
+    */
+   public List<String> getConnectionFrom() {
          return this.connectionFrom;
       }
 
@@ -615,7 +899,13 @@ public class Config {
          this.connectionFrom = var1;
       }
 
-      public List<String> getConnection() {
+/**
+    * getConnection
+    * Ritorna l'elenco dei server generali disabilitati dalla ricezione delle connessioni.
+    * 
+    * @return Una lista di server
+    */
+   public List<String> getConnection() {
          return this.connection;
       }
 
@@ -623,7 +913,13 @@ public class Config {
          this.connection = var1;
       }
 
-      public List<String> getPlugin() {
+/**
+    * getPlugin
+    * Ritorna la lista dei plugin o sub-servizi dove UltimateFriends è disabilitato.
+    * 
+    * @return Una lista di nomi in cui non agire
+    */
+   public List<String> getPlugin() {
          return this.plugin;
       }
 
@@ -631,7 +927,13 @@ public class Config {
          this.plugin = var1;
       }
 
-      public List<String> getOnlineStatus() {
+/**
+    * getOnlineStatus
+    * Ritorna la lista dei server in cui gli utenti offline/online o i messaggi online non appaiono.
+    * 
+    * @return Una lista limitata di server
+    */
+   public List<String> getOnlineStatus() {
          return this.onlineStatus;
       }
 
@@ -724,6 +1026,14 @@ public class Config {
       private String timeFormat = "yyyy-MM-dd HH:mm:ss";
       private String format = "[$time] - $filter: $player ($msg)";
 
+/**
+    * log
+    * Registra un log nel file filterLog.txt quando un messaggio viola uno dei regex del filter.
+    * 
+    * @param var1 L'id del filtro o azione scattata
+    * @param var2 Il nome dell'utente che ha scaturito il trigger
+    * @param var3 Il testo intercettato
+    */
       public void log(String var1, String var2, String var3) {
          BufferedWriter var4 = null;
 
@@ -759,6 +1069,12 @@ public class Config {
 
       }
 
+/**
+    * isEnabled
+    * Ritorna se il modulo file logger dei filtri è attivo o no.
+    * 
+    * @return true se il sistema salva i log su file, false altrimenti
+    */
       public boolean isEnabled() {
          return this.enabled;
       }
@@ -785,15 +1101,33 @@ public class Config {
          this.value = var6;
       }
 
-      public String getFormat() {
+/**
+    * getFormat
+    * Ritorna il testo formattato del bottone custom.
+    * 
+    * @return Il formato visibile
+    */
+   public String getFormat() {
          return this.format;
       }
 
-      public String getButtonText() {
+/**
+    * getButtonText
+    * Ritorna la dicitura effettiva del bottone premibile.
+    * 
+    * @return Il testo esplicito sul bottone
+    */
+   public String getButtonText() {
          return this.buttonText;
       }
 
-      public String getHoverText() {
+/**
+    * getHoverText
+    * Ritorna il suggerimento tool-tip che appare passandoci sopra con il mouse.
+    * 
+    * @return Il messaggio esteso interattivo
+    */
+   public String getHoverText() {
          return this.hoverText;
       }
 
@@ -801,7 +1135,13 @@ public class Config {
          return this.type;
       }
 
-      public String getValue() {
+/**
+    * getValue
+    * Ritorna il valore, URL, o porzione di comando eseguito dal trigger del click on bottone.
+    * 
+    * @return Il contenuto processato dal client
+    */
+   public String getValue() {
          return this.value;
       }
 
@@ -828,7 +1168,14 @@ public class Config {
 
       }
 
-      public String translate(String var1) {
+/**
+    * translate
+    * Traduce il nome interno del server in quello leggibile dall'utente, se l'alias esiste.
+    * 
+    * @param var1 Il nome effettivo del server originario
+    * @return L'alias configurato, oppure il nome originale se non presente
+    */
+   public String translate(String var1) {
          String var2 = (String)this.aliases.get(var1);
          if (var2 == null) {
             return var1;
@@ -895,27 +1242,63 @@ public class Config {
             this.show_broadcast = var1;
          }
 
-         public boolean show_msg_join() {
+/**
+    * show_msg_join
+    * Ritorna se il messaggio al login di un amico visibile di default per i nuovi utenti.
+    * 
+    * @return true se visibile, false altrimenti
+    */
+   public boolean show_msg_join() {
             return this.show_msg_join;
          }
 
-         public boolean show_msg_left() {
+/**
+    * show_msg_left
+    * Ritorna se il messaggio alla disconnessione di un amico visibile di default per i nuovi utenti.
+    * 
+    * @return true se visibile, false altrimenti
+    */
+   public boolean show_msg_left() {
             return this.show_msg_left;
          }
 
-         public boolean show_msg_switch() {
+/**
+    * show_msg_switch
+    * Ritorna se il messaggio di cambio-server di un amico visibile di default per i nuovi utenti.
+    * 
+    * @return true se visibile, false altrimenti
+    */
+   public boolean show_msg_switch() {
             return this.show_msg_switch;
          }
 
-         public boolean allow_requests() {
+/**
+    * allow_requests
+    * Indica se le nuove richieste d'amicizia in entrata sono ammesse di default.
+    * 
+    * @return true se ammesse, false se di bloccate di base
+    */
+   public boolean allow_requests() {
             return this.allow_requests;
          }
 
-         public boolean allow_private_msg() {
+/**
+    * allow_private_msg
+    * Indica se la ricezione dei messaggi privati è aperta di default per l'utenza.
+    * 
+    * @return true se liberi, false se bloccati
+    */
+   public boolean allow_private_msg() {
             return this.allow_private_msg;
          }
 
-         public boolean show_broadcast() {
+/**
+    * show_broadcast
+    * Indica se le allerte broadcast generali vengono renderizzate in chat.
+    * 
+    * @return true se ammesse, false altrimenti
+    */
+   public boolean show_broadcast() {
             return this.show_broadcast;
          }
 
@@ -939,3 +1322,16 @@ public class Config {
       ONLINE;
    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
