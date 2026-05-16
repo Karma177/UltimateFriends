@@ -4,7 +4,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.velocityPort</groupId>
 	<artifactId>UltimateFriends-VelocityPort</artifactId>
-	<author>Karma177</author>
 	<version>1.0.0</version>
 	
 	<properties>

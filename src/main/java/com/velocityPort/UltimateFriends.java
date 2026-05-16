@@ -1,4 +1,4 @@
-﻿/**
+/**
  * UltimateFriends - Velocity Port
  * 
  * Questo progetto è il port nativo per Velocity del plugin UltimateFriends. 
